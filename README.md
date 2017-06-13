@@ -100,8 +100,8 @@ Los más importantes son `default_demarcation` y `app_dir`:
 
 Cambia los permisos y crea un enlace simbólico en /usr/bin:
 ```bash
-$ sudo chmod +x /home/hts/tv_grab_es_movistartv
-$ sudo ln -s /home/hts/tv_grab_es_movistartv /usr/bin
+$ sudo chmod +x /home/hts/tv_grab_es_movistartv.py
+$ sudo ln -s /home/hts/tv_grab_es_movistartv.py /usr/bin/home/hts/tv_grab_es_movistartv
 ```
 
 Reinicia y ve a la interfaz web de TVHeadend:
