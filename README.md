@@ -115,20 +115,20 @@ Ve a `Configuration -> Channel / EPG -> EPG Grabber`:
 
 ![TVHeadend Grabber Config](https://s4.postimg.org/7w1iq800d/grabcron.png)
 
-Y sustituye el contenido de `Cron multi-line` por:
+Sustituye el contenido de `Cron multi-line` por:
 ```
 # Se ejecuta cada 3 días a las 22:30h
 30 22 */3 * *
 ```
 
-Guarda los cambios.
+Y guarda los cambios.
 
 ### Autor
 
 Escrito por _ _WiLloW_ _
 
-###### Basado en movistartv2xmltv by ese
+###### Basado en movistartv2xmltv by ese:
 * [https://github.com/ese/movistartv2xmltv](https://github.com/ese/movistartv2xmltv)
 
-###### Obtener la Lista de Canales y Programación de Movistar TV
-* [https://www.adslzone.net/postt359916.html](https://www.adslzone.net/postt359916.html)
+###### Mil gracias a Goomer por haber dado la clave para descifrar el nuevo formato:
+* [https://www.adslzone.net/postt359916-135.html#p2985166](https://www.adslzone.net/postt359916-135.html#p2985166)
