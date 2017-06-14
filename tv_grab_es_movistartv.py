@@ -628,7 +628,7 @@ class MulticastIPTV:
             sock.close()
             return _files
         except Exception, ex:
-            logger.error(MulticastError('Error al descargar los archivos XML: %s' % ex))
+            logger.error('Error al descargar los archivos XML: %s' % ex)
 
     @staticmethod
     def __get_channels(xml_channels):
