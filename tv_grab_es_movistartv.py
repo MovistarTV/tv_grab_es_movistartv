@@ -628,7 +628,7 @@ class MulticastIPTV:
             sock.close()
             return _files
         except Exception, ex:
-            logger.error('Error al descargar los archivos XML: %s' % ex)
+            logger.error('Error al descargar los archivos XML: %s' % ex.args)
 
     @staticmethod
     def __get_channels(xml_channels):
@@ -905,16 +905,21 @@ class XMLTV:
         tz = str((time.timezone / 3600))[1:]
         services = self.__get_client_channels()
         for channel_id in sorted(services, key=lambda key: int(services[key])):
-            tag_channel = ElTr.Element('channel', {'id': '%s.movistar.tv' % channel_id})
-            tag_dname = ElTr.SubElement(tag_channel, 'display-name')
-            tag_dname.text = self.__channels[channel_id]['name']
-            root.append(tag_channel)
+            if channel_id in self.__channels:
+                tag_channel = ElTr.Element('channel', {'id': '%s.movistar.tv' % channel_id})
+                tag_dname = ElTr.SubElement(tag_channel, 'display-name')
+                tag_dname.text = self.__channels[channel_id]['name']
+                root.append(tag_channel)
+            else:
+                logger.debug('El canal %s no tiene EPG' % channel_id)
         for channel_id in sorted(services, key=lambda key: int(services[key])):
-            chid = self.__channels[channel_id]['replacement'] \
-                if 'replacement' in self.__channels[channel_id] else channel_id
-            for program in sorted(parsed_epg[chid].keys()):
-                if parsed_epg[chid][program]['end'] > time.time() - 7200:
-                    root.append(self.__build_programme_tag(channel_id, parsed_epg[chid][program], tz))
+            if channel_id in self.__channels:
+                chid = self.__channels[channel_id]['replacement'] \
+                    if 'replacement' in self.__channels[channel_id] else channel_id
+                if chid in parsed_epg:
+                    for program in sorted(parsed_epg[chid].keys()):
+                        if parsed_epg[chid][program]['end'] > time.time() - 7200:
+                            root.append(self.__build_programme_tag(channel_id, parsed_epg[chid][program], tz))
         return ElTr.ElementTree(root)
 
     @staticmethod
@@ -985,14 +990,15 @@ class XMLTV:
                 '%i' % (tsse['season'] - 1) if tsse['season'] else '', tsse['episode'] - 1)
         # Películas y otros
         elif ext_info:
-            if 'Movie' in gens['genre']:
+            if 'Movie' in gens['genre'] and 'productionDate' in ext_info:
                 tag_stitle = ElTr.SubElement(tag_programme, 'sub-title', lang['es'])
                 tag_stitle.text = str(ext_info['productionDate'])
             tag_desc = ElTr.SubElement(tag_programme, 'desc', lang['es'])
             tag_desc.text = ext_info['synopsis']
-            tag_date = ElTr.SubElement(tag_programme, 'date')
-            tag_year = ElTr.SubElement(tag_date, 'year')
-            tag_year.text = str(ext_info['productionDate'])
+            if 'productionDate' in ext_info:
+                tag_date = ElTr.SubElement(tag_programme, 'date')
+                tag_year = ElTr.SubElement(tag_date, 'year')
+                tag_year.text = str(ext_info['productionDate'])
         # Comunes a los tres
         if ext_info:
             if ('mainActors' or 'directors') in ext_info:
@@ -1029,24 +1035,26 @@ class XMLTV:
         m3u = '#EXTM3U\n'
         services = self.__get_client_channels()
         for channel_id in sorted(services, key=lambda key: int(services[key])):
-            channel_name = self.__channels[channel_id]['name']
-            channel_key = channel_id
-            channel_ip = self.__channels[channel_id]['address']
-            channel_port = str(self.__channels[channel_id]['port'])
-            channel_tag = self.__channels[channel_id]['genre']
-            channel_number = services[channel_id]
-            channel_quality = 'HDTV' if 'HD' in channel_name else 'SDTV'
-            channel_logo = '%s%s%s' % (
-                mtv.get_first_end_point(),
-                config['tvChannelLogoPath'],
-                self.__channels[channel_id]['logo_uri']
-            )
-            if 'replacement' in self.__channels[channel_id]:
-                channel_key = self.__channels[self.__channels[channel_id]['replacement']]['id']
-            m3u += '#EXTINF:-1 tvh-epg="disable" tvh-chnum="%s" ' % channel_number
-            m3u += 'tvg-id="%s.movistar.tv" tvh-tags="Movistar TV|%s|%s" ' % (channel_key, channel_quality, channel_tag)
-            m3u += 'tvg-logo="%s",%s\n' % (channel_logo, channel_name)
-            m3u += 'rtp://@%s:%s\n' % (channel_ip, channel_port)
+            if channel_id in self.__channels:
+                channel_name = self.__channels[channel_id]['name']
+                channel_key = channel_id
+                channel_ip = self.__channels[channel_id]['address']
+                channel_port = str(self.__channels[channel_id]['port'])
+                channel_tag = self.__channels[channel_id]['genre']
+                channel_number = services[channel_id]
+                channel_quality = 'HDTV' if 'HD' in channel_name else 'SDTV'
+                channel_logo = '%s%s%s' % (
+                    mtv.get_first_end_point(),
+                    config['tvChannelLogoPath'],
+                    self.__channels[channel_id]['logo_uri']
+                )
+                if 'replacement' in self.__channels[channel_id]:
+                    channel_key = self.__channels[self.__channels[channel_id]['replacement']]['id']
+                m3u += '#EXTINF:-1 tvh-epg="disable" tvh-chnum="%s" ' % channel_number
+                m3u += 'tvg-id="%s.movistar.tv" tvh-tags="Movistar TV|%s|%s" ' % (
+                    channel_key, channel_quality, channel_tag)
+                m3u += 'tvg-logo="%s",%s\n' % (channel_logo, channel_name)
+                m3u += 'rtp://@%s:%s\n' % (channel_ip, channel_port)
         return m3u
 
     @staticmethod
