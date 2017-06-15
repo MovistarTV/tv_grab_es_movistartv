@@ -1206,5 +1206,5 @@ try:
 
 except Exception as e:
     logger.critical('%s\n%s' % (e.message, traceback.format_exc()))
-    print 'Excepción:\n\n\t %s\n\nTraceback:\n\n\t%s' % (e.message, traceback.format_exc())
+    print u'Excepción:\n\n\t %s\n\nTraceback:\n\n\t%s' % (e.message, traceback.format_exc())
     sys.exit(1)
