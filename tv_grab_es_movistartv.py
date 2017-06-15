@@ -549,7 +549,7 @@ class MovistarTV:
                         for ck in self.__cookie.split('; '):
                             if '=' in ck:
                                 req.add_header('Cookie', self.__cookie)
-                    response = urllib2.urlopen(req, timeout=10)
+                    response = urllib2.urlopen(req, timeout=15)
                     content = response.read().decode(response.headers.getparam('charset') or 'utf-8')
                     response.close()
                     if response.getcode() == 200:
