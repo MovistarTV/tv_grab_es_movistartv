@@ -27,26 +27,24 @@
 
 import argparse
 import codecs
+import json
+import logging
 import os
 import random
-import shutil
-import urllib2
-import xml.etree.cElementTree as ElTr
 import re
+import shutil
 import socket
 import struct
-import time
-import json
 import sys
-import logging
+import time
 import traceback
-
-from Queue import Queue
-from threading import Thread
-from datetime import datetime, timedelta
+import urllib2
+import xml.etree.cElementTree as ElTr
 from HTMLParser import HTMLParser
+from Queue import Queue
+from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
-
+from threading import Thread
 
 demarcations = {
     'Andalucia': 15,
@@ -902,7 +900,7 @@ class XMLTV:
                 'source_info_name': 'Grabber for Movistar TV Multicast EPG',
                 'generator_info_name': 'tv_grab_es_movistartv',
                 'generator_info_url': 'http://wiki.xmltv.org/index.php/XMLTVFormat'})
-        tz = str((time.timezone / 3600))[1:]
+        tz = abs(time.timezone / 3600) + time.localtime().tm_isdst
         services = self.__get_client_channels()
         for channel_id in sorted(services, key=lambda key: int(services[key])):
             if channel_id in self.__channels:
@@ -965,11 +963,10 @@ class XMLTV:
     def __build_programme_tag(self, channel_id, program, tz):
         start = datetime.fromtimestamp(program['start']).strftime('%Y%m%d%H%M%S')
         stop = datetime.fromtimestamp(program['end']).strftime('%Y%m%d%H%M%S')
-        tzdst = int(tz) + time.localtime().tm_isdst
         tag_programme = ElTr.Element('programme', {
             'channel': '%s.movistar.tv' % channel_id,
-            'start': '%s +0%s00' % (start, tzdst),
-            'stop': '%s +0%s00' % (stop, tzdst)})
+            'start': '%s +0%s00' % (start, tz),
+            'stop': '%s +0%s00' % (stop, tz)})
         tag_title = ElTr.SubElement(tag_programme, 'title', lang['es'])
         tag_title.text = program['full_title']
         gens = self.__get_genre_and_subgenre(program['genre'])
@@ -996,8 +993,7 @@ class XMLTV:
             tag_desc = ElTr.SubElement(tag_programme, 'desc', lang['es'])
             tag_desc.text = ext_info['synopsis']
             if 'productionDate' in ext_info:
-                tag_date = ElTr.SubElement(tag_programme, 'date')
-                tag_year = ElTr.SubElement(tag_date, 'year')
+                tag_year = ElTr.SubElement(tag_programme, 'year')
                 tag_year.text = str(ext_info['productionDate'])
         # Comunes a los tres
         if ext_info:
@@ -1011,6 +1007,8 @@ class XMLTV:
                     tag_actor.text = self.__credits_to_string(ext_info['mainActors'])
             ElTr.SubElement(tag_programme, 'icon', {
                     'src': '%s%s%s' % (mtv.get_first_end_point(), config['tvCoversPath'], ext_info['cover'])})
+        tag_original_title = ElTr.SubElement(tag_programme, 'original-title')
+        tag_original_title.text = '%s|%s' % (channel_id, program['pid'])
         tag_rating = ElTr.SubElement(tag_programme, 'rating', {'system': 'pl'})
         tag_value = ElTr.SubElement(tag_rating, 'value')
         tag_value.text = age_rating[program['age_rating']]
