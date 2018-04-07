@@ -431,6 +431,7 @@ class MovistarTV:
         except:
             logger.error('Usando el pefil del servicio por defecto')
             return {
+                'RES_BASE_URI': 'http://www-60.svc.imagenio.telefonica.net:2001/appclientv/nux/',
                 'dvbConfig': {'dvbEntryPoint': '239.0.2.129:3937'},
                 'endPoints': end_points
             }
@@ -457,13 +458,13 @@ class MovistarTV:
             logger.error('Mapa de géneros no encontrado: %s' % ex.args)
             return None
 
-    def get_epg_extended_info(self, pid):
+    def get_epg_extended_info(self, pid, channel_id):
         # noinspection PyBroadException
         try:
             data = cache.load_epg_extended_info(pid)
             if not data:
                 logger.debug('Descargando info extendida: %s' % pid)
-                data = json.loads(self.__get_service_data('epgInfo&extra=1&productID=%s&similar=0' % pid))['resultData']
+                data = json.loads(self.__get_service_data('epgInfo&extra=1&productID=%s&channelID=%s&similar=0&filterHD=1' % (pid, channel_id)))['resultData']
                 cache.save_epg_extended_info(data)
             return data
         except:
@@ -521,10 +522,13 @@ class MovistarTV:
             'end_points': self.__update_end_points(platform['endPoints']),
             'mcast_grp': dvb_entry_point[0],
             'mcast_port': int(dvb_entry_point[1]),
-            'tvChannelLogoPath': '/appclient/%s' % params['tvChannelLogoPath'],
-            'tvCoversPath': '/appclient/%sportrait/290x429/' % params['tvCoversPath'],
-            'tvCoversLandscapePath': '/appclient/%s%s%s' % (
-                params['tvCoversPath'], params['landscapeSubPath'], params['bigSubpath']),
+            'tvChannelLogoPath': '%s%s' % (platform['RES_BASE_URI'], params['tvChannelLogoPath']),
+            'tvCoversPath': '%s%sportrait/290x429/' % (platform['RES_BASE_URI'], params['tvCoversPath']),
+            'tvCoversLandscapePath': '%s%s%s%s' % (
+                platform['RES_BASE_URI'],
+                params['tvCoversPath'],
+                params['landscapeSubPath'],
+                params['bigSubpath']),
             'genres': self.__get_genres(client['tvWholesaler'])}
         cache.save_config(conf)
         return conf
@@ -562,7 +566,7 @@ class MovistarTV:
                     raise urllib2.HTTPError
                 except (urllib2.HTTPError, socket.timeout, urllib2.URLError):
                     __attempts -= 1
-                    logger.error('Timeout: %s, reintentos: %s' % (ep, __attempts))
+                    logger.warn('Timeout: %s, reintentos: %s' % (ep, __attempts))
                     continue
 
 
@@ -970,7 +974,7 @@ class XMLTV:
         tag_title = ElTr.SubElement(tag_programme, 'title', lang['es'])
         tag_title.text = program['full_title']
         gens = self.__get_genre_and_subgenre(program['genre'])
-        ext_info = mtv.get_epg_extended_info(program['pid'])
+        ext_info = mtv.get_epg_extended_info(program['pid'], channel_id)
         # Series
         if program['is_serie']:
             tsse = self.__get_series_data(program, ext_info)
@@ -1006,7 +1010,7 @@ class XMLTV:
                     tag_actor = ElTr.SubElement(tag_credits, 'actor')
                     tag_actor.text = self.__credits_to_string(ext_info['mainActors'])
             ElTr.SubElement(tag_programme, 'icon', {
-                    'src': '%s%s%s' % (mtv.get_first_end_point(), config['tvCoversPath'], ext_info['cover'])})
+                    'src': '%s%s' % (config['tvCoversPath'], ext_info['cover'])})
         tag_original_title = ElTr.SubElement(tag_programme, 'original-title')
         tag_original_title.text = '%s|%s' % (channel_id, program['pid'])
         tag_rating = ElTr.SubElement(tag_programme, 'rating', {'system': 'pl'})
@@ -1041,11 +1045,7 @@ class XMLTV:
                 channel_tag = self.__channels[channel_id]['genre']
                 channel_number = services[channel_id]
                 channel_quality = 'HDTV' if 'HD' in channel_name else 'SDTV'
-                channel_logo = '%s%s%s' % (
-                    mtv.get_first_end_point(),
-                    config['tvChannelLogoPath'],
-                    self.__channels[channel_id]['logo_uri']
-                )
+                channel_logo = '%s%s' % (config['tvChannelLogoPath'], self.__channels[channel_id]['logo_uri'])
                 if 'replacement' in self.__channels[channel_id]:
                     channel_key = self.__channels[self.__channels[channel_id]['replacement']]['id']
                 m3u += '#EXTINF:-1 tvh-epg="disable" tvh-chnum="%s" ' % channel_number
