@@ -7,30 +7,30 @@ suministrados por el operador vía multicast.
 
 Se integra con TVHeadend.
 
-![Kodi + TVHeadend + Movistar TV Grabber](https://s23.postimg.org/5us61rtjf/koditvhmtv.png)
+![Kodi + TVHeadend + Movistar TV Grabber](images/koditvhmtv.png)
 
 ##### Requisitos:
 
 * Servicio de Movistar TV correctamente configurado (DNS `172.26.23.3` y rutas correspondientes).
-* Conexión por cable.
+* Funciona tanto por Wifi como por Ethernet, pero mejor por cable.
 
 #### Características
 
 * Un solo archivo
 * No necesita configuración: la descarga del proveedor de servicios
-* Genera la guía y la lista sólo de los canales y paquetes contratados
+* Genera la guía y la lista de canales de los paquetes contratados
 * Descarga la guía EPG multicast de varias IP simultáneamente para reducir el tiempo de ejecución
 * Descarta los programas finalizados para no sobrecargar los servidores del operador
 * Los títulos y subtítulos siguen los esquemas `Título de la serie` y `1x01 Título del episodio` respectivamente
   (en caso de película el año se establece como subtítulo)
-* Guía EPG coloreada (Géneros adaptados a TVHeadend)
+* Guía EPG coloreada (géneros adaptados a TVHeadend)
 * Mantiene una caché con todos los datos descargados (se autolimpia pasados unos días y se puede resetear)
 * Mantiene un registro configurable de los eventos que suceden durante la ejecución del script
 * En caso de fallo de conexión se usan parámetros por defecto que se pueden personalizar
-* Se utilizan todos los End Point disponibles y en caso de fallos reiterados 
+* Se utilizan todos los EndPoint disponibles y en caso de fallos reiterados 
   los añade a una lista negra
-* En caso de fallo del conjunto de End Points se descarga una guía básica
-* Licencia GPL v3
+* En caso de fallo del conjunto de EndPoints se descarga una guía básica
+* Licencia GPLv3
 
 #### Opciones
 
@@ -98,27 +98,28 @@ Los más importantes son `default_demarcation` y `app_dir`:
 
 #### Integración en TVheadend
 
-Cambia los permisos y crea un enlace simbólico en /usr/bin:
+Mueve el script a /usr/bin y cambia el propietario y los permisos:
 ```bash
-$ sudo chmod +x /home/hts/tv_grab_es_movistartv.py
-$ sudo ln -s /home/hts/tv_grab_es_movistartv.py /usr/bin/tv_grab_es_movistartv
+$ sudo mv tv_grab_es_movistartv.py /usr/bin/tv_grab_es_movistartv
+$ sudo chown root:root /usr/bin/tv_grab_es_movistartv
+$ sudo chmod 755 /usr/bin/tv_grab_es_movistartv
 ```
 
 Reinicia y ve a la interfaz web de TVHeadend:
 
-![TVHeadend Grabber Modules Config](https://s13.postimg.org/irm00ry4n/tvhconfig.png)
+![TVHeadend Grabber Modules Config](images/tvhconfig.png)
 
 En `Configuration -> Channel / EPG -> EPG Grabber Modules` activa el grabber `Internal XMLTV: Spain (MovistarTV)` 
 y pon como argumento: `--tvheadend /home/hts/.xmltv/MovistarTV`
 
 Ve a `Configuration -> Channel / EPG -> EPG Grabber`:
 
-![TVHeadend Grabber Config](https://s4.postimg.org/7w1iq800d/grabcron.png)
+![TVHeadend Grabber Config](images/grabcron.png)
 
 Sustituye el contenido de `Cron multi-line` por:
 ```
-# Se ejecuta cada 3 días a las 22:30h
-30 22 */3 * *
+# Se ejecuta todos los días a las 22:30h
+30 22 * * *
 ```
 
 Y guarda los cambios.
@@ -130,5 +131,5 @@ Escrito por _ _WiLloW_ _
 ###### Basado en movistartv2xmltv by ese:
 * [https://github.com/ese/movistartv2xmltv](https://github.com/ese/movistartv2xmltv)
 
-###### Mil gracias a Goomer por haber dado la clave para descifrar el nuevo formato:
+###### Mil gracias a Gomer por haber dado la clave para descifrar el nuevo formato:
 * [https://www.adslzone.net/postt359916-135.html#p2985166](https://www.adslzone.net/postt359916-135.html#p2985166)
