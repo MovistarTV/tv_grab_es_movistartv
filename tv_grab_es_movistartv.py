@@ -444,7 +444,7 @@ class MovistarTV:
         except:
             logger.error('Usando los parámetros de configuración por defecto')
             return {
-                'tvChannelLogoPath': 'incoming/epg/MAY_1/channelLogo/NUX/',
+                'tvChannelLogoPath': 'incoming/epg/channelLogo/',
                 'tvCoversPath': 'incoming/covers/programmeImages/',
                 'landscapeSubPath': 'landscape/',
                 'bigSubpath': 'big/'
