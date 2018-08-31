@@ -124,6 +124,40 @@ Sustituye el contenido de `Cron multi-line` por:
 
 Y guarda los cambios.
 
+#### Solución de problemas
+
+##### - No se ven los logos de los canales en Kodi
+
+Movistar ha cambiado las URI de los logos de los canales al menos en una ocasión. Si has actualizado el 
+grabber y aún así no se ven los logos en Kodi, ve a la lista de canales de la interfaz web de TVHeadend 
+en `Configuration -> Channel / EPG -> Channels`, selecciónalos todos y bórralos pulsando `Delete`:
+
+![TVHeadend Channels Config](images/delchannels.png)
+
+Ahora ve a la lista de Servicios en `Configuration -> DVB Inputs -> Services` y vuelve a mapearlos pulsando 
+en `Map all services`:
+
+![TVHeadend Services Config](images/mapservices.png)
+
+Reinicia Kodi. Si siguen sin verse ve a la configuración de Kodi y borra los datos de la TV en 
+`Configuración -> Ajustes de PVR y TV en directo -> General -> Borrar datos`:
+
+![TVHeadend Channels Config](images/borrardatos.png)
+
+Ve a la lista de canales y comprueba que ya se ven.
+
+##### - Error al descargar los archivos XML: timed out
+
+La descarga de la guía básica que viene por Multicast es multihilo, se conecta a varias IP simultáneamente para 
+agilizar el tiempo de ejecución del grabber. Por defecto hay tres hilos (tres conexiones a tres IP diferentes) 
+porque a partir de cuatro he notado que pueden errores de este tipo.
+
+Si es tu caso, baja el número de conexiones a dos: edita el grabber, busca la línea `threads = 3` y cámbiala por 
+`threads = 2`.
+
+Si sigues teniendo problemas desactiva el multihilo: busca la línea `use_multithread = True` y cámbiala por 
+`use_multithread = False`
+
 ### Autor
 
 Escrito por _ _WiLloW_ _
