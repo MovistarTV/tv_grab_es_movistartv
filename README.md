@@ -9,12 +9,12 @@ Se integra con TVHeadend.
 
 ![Kodi + TVHeadend + Movistar TV Grabber](images/koditvhmtv.png)
 
-##### Requisitos:
+#### Requisitos:
 
 * Servicio de Movistar TV correctamente configurado (DNS `172.26.23.3` y rutas correspondientes).
 * Funciona tanto por Wifi como por Ethernet, pero mejor por cable.
 
-#### Características
+### Características
 
 * Un solo archivo
 * No necesita configuración: la descarga del proveedor de servicios
@@ -32,7 +32,7 @@ Se integra con TVHeadend.
 * En caso de fallo del conjunto de EndPoints se descarga una guía básica
 * Licencia GPLv3
 
-#### Opciones
+### Opciones
 
 Argumentos que acepta el programa:
 ```
@@ -56,24 +56,24 @@ optional arguments:
   --reset               Delete saved configuration, log file and caches.
 ```
 
-##### Ejemplos:
+#### Ejemplos:
 
 Vuelca la guía EPG en un archivo XML:
 ```bash
-$ tv_grab_es_movistartv --output /home/hts/guia.xml
+$ tv_grab_es_movistartv --output /home/hts/.xmltv/guia.xml
 ```
 
 Genera la lista de canales:
 ```bash
-$ tv_grab_es_movistartv --m3u /home/hts/MovistarTV
+$ tv_grab_es_movistartv --m3u /home/hts/.xmltv/MovistarTV
 ```
 
 Actualiza la EPG y la lista de canales en TVHeadend:
 ```bash
-$ tv_grab_es_movistartv --tvheadend /home/hts/MovistarTV
+$ tv_grab_es_movistartv --tvheadend /home/hts/.xmltv/MovistarTV
 ```
 
-#### Configuración
+### Configuración
 
 Edita el programa con vi, nano, gedit, kedit... y cambia los parámetros de configuración según tus necesidades:
 ```
@@ -96,7 +96,7 @@ Los más importantes son `default_demarcation` y `app_dir`:
 * `default_demarcation`: cambia `'Asturias'` por el nombre de tu provincia (ver diccionario `demarcations`)
 * `app_dir`: si cambias la ruta por defecto asegúrate de que TVHeadend tiene permisos de escritura en la nueva ruta
 
-#### Integración en TVheadend
+### Integración en TVheadend
 
 Mueve el script a /usr/bin y cambia el propietario y los permisos:
 ```bash
@@ -124,13 +124,25 @@ Sustituye el contenido de `Cron multi-line` por:
 
 Y guarda los cambios.
 
-#### Solución de problemas
+### Solución de problemas
 
-##### - No se ven los logos de los canales en Kodi
+#### - No se ven los logos de los canales en Kodi
 
 Movistar ha cambiado las URI de los logos de los canales al menos en una ocasión. Si has actualizado el 
-grabber y aún así no se ven los logos en Kodi, ve a la lista de canales de la interfaz web de TVHeadend 
-en `Configuration -> Channel / EPG -> Channels`, selecciónalos todos y bórralos pulsando `Delete`:
+grabber y aún así no se ven los logos en Kodi, sigue estos pasos:
+
+Borra la caché del grabber:
+```bash
+$ sudo tv_grab_es_movistartv --reset
+```
+
+Regenera la lista de canales (cambia el usuario y la ruta según tu configuración):
+```bash
+$ sudo -u hts tv_grab_es_movistartv --m3u /home/hts/.xmltv/MovistarTV
+```
+
+Ve a la lista de canales de la interfaz web de TVHeadend en `Configuration -> Channel / EPG -> Channels`, 
+selecciónalos todos y bórralos pulsando `Delete`:
 
 ![TVHeadend Channels Config](images/delchannels.png)
 
@@ -146,11 +158,11 @@ Reinicia Kodi. Si siguen sin verse ve a la configuración de Kodi y borra los da
 
 Ve a la lista de canales y comprueba que ya se ven.
 
-##### - Error al descargar los archivos XML: timed out
+#### - Error al descargar los archivos XML: timed out
 
 La descarga de la guía básica que viene por Multicast es multihilo, se conecta a varias IP simultáneamente para 
 agilizar el tiempo de ejecución del grabber. Por defecto hay tres hilos (tres conexiones a tres IP diferentes) 
-porque a partir de cuatro he notado que pueden errores de este tipo.
+porque a partir de cuatro he notado que pueden aparecer errores de este tipo.
 
 Si es tu caso, baja el número de conexiones a dos: edita el grabber, busca la línea `threads = 3` y cámbiala por 
 `threads = 2`.
@@ -158,12 +170,12 @@ Si es tu caso, baja el número de conexiones a dos: edita el grabber, busca la l
 Si sigues teniendo problemas desactiva el multihilo: busca la línea `use_multithread = True` y cámbiala por 
 `use_multithread = False`
 
-### Autor
+## Autor
 
 Escrito por _ _WiLloW_ _
 
-###### Basado en movistartv2xmltv by ese:
+##### Basado en movistartv2xmltv by ese:
 * [https://github.com/ese/movistartv2xmltv](https://github.com/ese/movistartv2xmltv)
 
-###### Mil gracias a Gomer por haber dado la clave para descifrar el nuevo formato:
+##### Mil gracias a Gomer por haber dado la clave para descifrar el nuevo formato:
 * [https://www.adslzone.net/postt359916-135.html#p2985166](https://www.adslzone.net/postt359916-135.html#p2985166)
