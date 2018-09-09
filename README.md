@@ -89,12 +89,15 @@ log_size = 5  # MB
 
 cookie_file = 'tv_grab_es_movistartv.cookie'
 end_points_file = 'tv_grab_es_movistartv.endpoints'
+
+max_credits = 4
 ```
 
 Los más importantes son `default_demarcation` y `app_dir`:
 
 * `default_demarcation`: cambia `'Asturias'` por el nombre de tu provincia (ver diccionario `demarcations`)
 * `app_dir`: si cambias la ruta por defecto asegúrate de que TVHeadend tiene permisos de escritura en la nueva ruta
+* `max_credits`: número máximo de actores/directores que se mostrarán en la lista de créditos
 
 ### Integración en TVheadend
 
@@ -177,5 +180,5 @@ Escrito por _ _WiLloW_ _
 ##### Basado en movistartv2xmltv by ese:
 * [https://github.com/ese/movistartv2xmltv](https://github.com/ese/movistartv2xmltv)
 
-##### Mil gracias a Gomer por haber dado la clave para descifrar el nuevo formato:
+##### Mil gracias a Goomer por haber dado la clave para descifrar el nuevo formato:
 * [https://www.adslzone.net/postt359916-135.html#p2985166](https://www.adslzone.net/postt359916-135.html#p2985166)
