@@ -79,6 +79,8 @@ log_size = 5  # MB
 cookie_file = 'tv_grab_es_movistartv.cookie'
 end_points_file = 'tv_grab_es_movistartv.endpoints'
 
+max_credits = 4
+
 end_points = {
     'epNoCach1': 'http://www-60.svc.imagenio.telefonica.net:2001',
     'epNoCach2': 'http://nc2.svc.imagenio.telefonica.net:2001',
@@ -932,6 +934,15 @@ class XMLTV:
         }
 
     @staticmethod
+    def __get_key_and_subkey(code, genres):
+        genre = next(genre for genre in genres if genre['id'].upper() == (code[0] if code[0] == '0' else ('%s%s' % (code[0], '0')).upper()))
+        subgenre = None if code[1] == '0' else next(subgenre for subgenre in genre['subgenres'] if subgenre['id'].upper() == (code[1].upper() if code[0] == '0' else ('%s%s' % (code[0], code[1])).upper()))
+        return {
+            'key': genre['name'],
+            'sub-key': subgenre['name'] if subgenre else None
+        }
+
+    @staticmethod
     def __get_series_data(program, ext_info):
         episode = int(program['episode'])
         season = int(program['season'])
@@ -957,13 +968,6 @@ class XMLTV:
             'desc': desc
         }
 
-    @staticmethod
-    def __credits_to_string(credits):
-        string = ''
-        for credit in credits[:len(credits) if len(credits) <= 4 else 4]:
-            string += '%s,' % credit
-        return string[:-1]
-
     def __build_programme_tag(self, channel_id, program, tz):
         start = datetime.fromtimestamp(program['start']).strftime('%Y%m%d%H%M%S')
         stop = datetime.fromtimestamp(program['end']).strftime('%Y%m%d%H%M%S')
@@ -974,6 +978,7 @@ class XMLTV:
         tag_title = ElTr.SubElement(tag_programme, 'title', lang['es'])
         tag_title.text = program['full_title']
         gens = self.__get_genre_and_subgenre(program['genre'])
+        keys = self.__get_key_and_subkey(program['genre'], config['genres'])
         ext_info = mtv.get_epg_extended_info(program['pid'], channel_id)
         # Series
         if program['is_serie']:
@@ -984,8 +989,7 @@ class XMLTV:
             tag_desc = ElTr.SubElement(tag_programme, 'desc', lang['es'])
             tag_desc.text = tsse['desc']
             tag_date = ElTr.SubElement(tag_programme, 'date')
-            tag_year = ElTr.SubElement(tag_date, 'year')
-            tag_year.text = program['year']
+            tag_date.text = program['year']
             tag_episode_num = ElTr.SubElement(tag_programme, 'episode-num', {'system': 'xmltv_ns'})
             tag_episode_num.text = '%s.%i.' % (
                 '%i' % (tsse['season'] - 1) if tsse['season'] else '', tsse['episode'] - 1)
@@ -997,18 +1001,22 @@ class XMLTV:
             tag_desc = ElTr.SubElement(tag_programme, 'desc', lang['es'])
             tag_desc.text = ext_info['synopsis']
             if 'productionDate' in ext_info:
-                tag_year = ElTr.SubElement(tag_programme, 'year')
-                tag_year.text = str(ext_info['productionDate'])
+                tag_date = ElTr.SubElement(tag_programme, 'date')
+                tag_date.text = str(ext_info['productionDate'])
         # Comunes a los tres
         if ext_info:
             if ('mainActors' or 'directors') in ext_info:
                 tag_credits = ElTr.SubElement(tag_programme, 'credits')
                 if 'directors' in ext_info:
-                    tag_director = ElTr.SubElement(tag_credits, 'director')
-                    tag_director.text = self.__credits_to_string(ext_info['directors'])
+                    length = len(ext_info['directors']) if len(ext_info['directors']) <= max_credits else max_credits
+                    for director in ext_info['directors'][:length]:
+                        tag_director = ElTr.SubElement(tag_credits, 'director')
+                        tag_director.text = director.strip()
                 if 'mainActors' in ext_info:
-                    tag_actor = ElTr.SubElement(tag_credits, 'actor')
-                    tag_actor.text = self.__credits_to_string(ext_info['mainActors'])
+                    length = len(ext_info['mainActors']) if len(ext_info['mainActors']) <= max_credits else max_credits
+                    for actor in ext_info['mainActors'][:length]:
+                        tag_actor = ElTr.SubElement(tag_credits, 'actor')
+                        tag_actor.text = actor.strip()
             ElTr.SubElement(tag_programme, 'icon', {
                     'src': '%s%s' % (config['tvCoversPath'], ext_info['cover'])})
         tag_original_title = ElTr.SubElement(tag_programme, 'original-title')
@@ -1021,6 +1029,11 @@ class XMLTV:
         if gens['sub-genre']:
             tag_subcategory = ElTr.SubElement(tag_programme, 'category', {'lang': 'en'})
             tag_subcategory.text = gens['sub-genre']
+        tag_keyword = ElTr.SubElement(tag_programme, 'keyword')
+        tag_keyword.text = keys['key']
+        if keys['sub-key']:
+            tag_subkeyword = ElTr.SubElement(tag_programme, 'keyword')
+            tag_subkeyword.text = keys['sub-key']
         return tag_programme
 
     def write_m3u(self, file_path):
