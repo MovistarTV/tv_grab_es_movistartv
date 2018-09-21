@@ -1043,7 +1043,8 @@ class XMLTV:
     def __get_client_channels(self):
         services = {}
         for package in config['tvPackages'].split('|') if config['tvPackages'] != 'ALL' else self.__packages.keys():
-            services.update(self.__packages[package]['services'])
+            if package in self.__packages:
+                services.update(self.__packages[package]['services'])
         return services
 
     def __generate_m3u(self):
