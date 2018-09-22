@@ -935,6 +935,8 @@ class XMLTV:
 
     @staticmethod
     def __get_key_and_subkey(code, genres):
+        if not genres:
+            return None
         genre = next(genre for genre in genres if genre['id'].upper() == (code[0] if code[0] == '0' else ('%s%s' % (code[0], '0')).upper()))
         subgenre = None if code[1] == '0' else next(subgenre for subgenre in genre['subgenres'] if subgenre['id'].upper() == (code[1].upper() if code[0] == '0' else ('%s%s' % (code[0], code[1])).upper()))
         return {
@@ -1029,11 +1031,12 @@ class XMLTV:
         if gens['sub-genre']:
             tag_subcategory = ElTr.SubElement(tag_programme, 'category', {'lang': 'en'})
             tag_subcategory.text = gens['sub-genre']
-        tag_keyword = ElTr.SubElement(tag_programme, 'keyword')
-        tag_keyword.text = keys['key']
-        if keys['sub-key']:
-            tag_subkeyword = ElTr.SubElement(tag_programme, 'keyword')
-            tag_subkeyword.text = keys['sub-key']
+        if keys:
+            tag_keyword = ElTr.SubElement(tag_programme, 'keyword')
+            tag_keyword.text = keys['key']
+            if keys['sub-key']:
+                tag_subkeyword = ElTr.SubElement(tag_programme, 'keyword')
+                tag_subkeyword.text = keys['sub-key']
         return tag_programme
 
     def write_m3u(self, file_path):
