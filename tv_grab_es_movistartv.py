@@ -72,6 +72,10 @@ app_dir = '/home/hts/.xmltv'
 use_multithread = True
 cache_exp = 3  # Días
 
+# Generar lista de canales para udpxy
+# 192.168.0.1:4022
+udpxy = None
+
 log_file = 'tv_grab_es_movistartv.log'
 log_level = logging.INFO
 log_size = 5  # MB
@@ -1069,7 +1073,9 @@ class XMLTV:
                 m3u += 'tvg-id="%s.movistar.tv" tvh-tags="Movistar TV|%s|%s" ' % (
                     channel_key, channel_quality, channel_tag)
                 m3u += 'tvg-logo="%s",%s\n' % (channel_logo, channel_name)
-                m3u += 'rtp://@%s:%s\n' % (channel_ip, channel_port)
+                if udpxy:
+                    m3u += 'http://%s/udp/%s:%s\n' % (udpxy, channel_ip, channel_port)
+                else: m3u += 'rtp://@%s:%s\n' % (channel_ip, channel_port)
         return m3u
 
     @staticmethod
