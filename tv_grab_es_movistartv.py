@@ -657,7 +657,7 @@ class MulticastIPTV:
                     'logo_uri': i[1].attrib['logoURI'] if 'logoURI' in i[1].attrib else 'MAY_1/imSer/4146.jpg'}
                 if i[2][4].tag == '{urn:dvb:ipisdns:2006}ReplacementService':
                     channel_list[channel_id]['replacement'] = i[2][4][0].attrib['ServiceName']
-            except KeyError as ex:
+            except (KeyError, IndexError) as ex:
                 logger.debug('El canal %s no tiene la estructura correcta: %s' % (channel_id, ex.args))
         logger.info('Canales: %i' % len(channel_list))
         return channel_list
@@ -679,8 +679,8 @@ class MulticastIPTV:
                     if not service.tag == '{urn:dvb:ipisdns:2006}PackageName':
                         service_id = service[0].attrib['ServiceName']
                         package_list[package_name]['services'][service_id] = service[1].text
-            except KeyError:
-                logger.error('El paquete %s no tiene la estructura correcta' % package_name)
+            except (KeyError, ElTr.ParseError) as ex:
+                logger.error('El paquete %s no tiene la estructura correcta: %s' % (package_name, ex.args))
         logger.info('Paquetes: %i' % len(package_list))
         return package_list
 
