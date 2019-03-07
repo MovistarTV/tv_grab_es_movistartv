@@ -461,7 +461,7 @@ class MovistarTV:
             logger.info('Descargando mapa de géneros')
             return json.loads(self.__get_service_data('getEpgSubGenres&tvWholesaler=%s' % tv_wholesaler))['resultData']
         except Exception as ex:
-            logger.error('Mapa de géneros no encontrado: %s' % ex.args)
+            logger.error('Mapa de géneros no encontrado: %s' % str(ex.args))
             return None
 
     def get_epg_extended_info(self, pid, channel_id):
@@ -596,7 +596,7 @@ class MulticastIPTV:
             }
             return chunk
         except Exception as ex:
-            raise MulticastError('get_chunk: error al analizar los datos %s' % ex.args)
+            raise MulticastError('get_chunk: error al analizar los datos %s' % str(ex.args))
 
     def __get_xml_files(self, mc_grp, mc_port):
         try:
@@ -636,7 +636,7 @@ class MulticastIPTV:
             sock.close()
             return _files
         except Exception, ex:
-            logger.error('Error al descargar los archivos XML: %s' % ex.args)
+            logger.error('Error al descargar los archivos XML: %s' % str(ex.args))
 
     @staticmethod
     def __get_channels(xml_channels):
@@ -658,7 +658,7 @@ class MulticastIPTV:
                 if i[2][4].tag == '{urn:dvb:ipisdns:2006}ReplacementService':
                     channel_list[channel_id]['replacement'] = i[2][4][0].attrib['ServiceName']
             except (KeyError, IndexError) as ex:
-                logger.debug('El canal %s no tiene la estructura correcta: %s' % (channel_id, ex.args))
+                logger.debug('El canal %s no tiene la estructura correcta: %s' % (channel_id, str(ex.args)))
         logger.info('Canales: %i' % len(channel_list))
         return channel_list
 
@@ -680,7 +680,7 @@ class MulticastIPTV:
                         service_id = service[0].attrib['ServiceName']
                         package_list[package_name]['services'][service_id] = service[1].text
             except (KeyError, ElTr.ParseError) as ex:
-                logger.error('El paquete %s no tiene la estructura correcta: %s' % (package_name, ex.args))
+                logger.error('El paquete %s no tiene la estructura correcta: %s' % (package_name, str(ex.args)))
         logger.info('Paquetes: %i' % len(package_list))
         return package_list
 
@@ -821,7 +821,7 @@ class MulticastIPTV:
                 'data': data[body:]
             }
         except Exception as ex:
-            logger.error('Error al procesar la cabecera: %s' % ex.args)
+            logger.error('Error al procesar la cabecera: %s' % str(ex.args))
 
     @staticmethod
     def __sanitize(text):
@@ -866,7 +866,7 @@ class MulticastIPTV:
                 epg_dt = epg_dt[struct.unpack('B', epg_dt[cut + 3:cut + 4])[0] + cut + 4:]
             return programs
         except Exception as ex:
-            logger.error('Error al procesar la guía: %s' % ex.args)
+            logger.error('Error al procesar la guía: %s' % str(ex.args))
 
     def __merge_dicts(self, dict1, dict2, path=None):
         path = [] if path is None else path
