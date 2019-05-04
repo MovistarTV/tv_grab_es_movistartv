@@ -987,7 +987,7 @@ class XMLTV:
         keys = self.__get_key_and_subkey(program['genre'], config['genres'])
         ext_info = mtv.get_epg_extended_info(program['pid'], channel_id)
         # Series
-        if program['is_serie']:
+        if program['serie_id'] > 0:
             tsse = self.__get_series_data(program, ext_info)
             tag_title.text = tsse['title']
             tag_stitle = ElTr.SubElement(tag_programme, 'sub-title', lang['es'])
