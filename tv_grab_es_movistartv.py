@@ -518,7 +518,7 @@ class MovistarTV:
         client = self.__get_client_profile()
         platform = self.__get_platform_profile()
         params = self.__get_config_params()
-        dvb_entry_point = platform['dvbConfig']['dvbEntryPoint'].split(':')
+        dvb_entry_point = platform['dvbConfig']['dvbipiEntryPoint'].split(':')
         logger.info('tvPackages: %s' % client['tvPackages'])
         logger.info('Demarcation: %s' % client['demarcation'])
         conf = {
