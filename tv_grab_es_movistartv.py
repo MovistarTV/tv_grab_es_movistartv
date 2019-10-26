@@ -70,6 +70,7 @@ default_demarcation = demarcations['Asturias']
 
 app_dir = '/home/hts/.xmltv'
 use_multithread = True
+threads = 3
 cache_exp = 3  # Días
 
 # Generar lista de canales para udpxy
@@ -752,7 +753,6 @@ class MulticastIPTV:
 
     def __get_bin_epg_threaded(self):
         queue = Queue()
-        threads = 3
         day = -1
         # noinspection PyUnusedLocal
         self.__epg = [{} for r in range(0, len(self.__xml_data['segments']))]
