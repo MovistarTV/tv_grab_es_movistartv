@@ -67,12 +67,6 @@ demarcations = {
 }
 
 app_dir = '/home/hts/.xmltv'
-use_multithread = True
-cache_exp = 3  # Días
-
-# Generar lista de canales para udpxy
-# 192.168.0.1:4022
-udpxy = None
 
 log_file = 'tv_grab_es_movistartv.log'
 log_level = logging.INFO
@@ -80,8 +74,6 @@ log_size = 5  # MB
 
 cookie_file = 'tv_grab_es_movistartv.cookie'
 end_points_file = 'tv_grab_es_movistartv.endpoints'
-
-max_credits = 4
 
 end_points = {
     'epNoCach1': 'http://www-60.svc.imagenio.telefonica.net:2001',
@@ -750,7 +742,6 @@ class MulticastIPTV:
 
     def __get_bin_epg_threaded(self):
         queue = Queue()
-        threads = 3
         day = -1
         # noinspection PyUnusedLocal
         self.__epg = [{} for r in range(0, len(self.__xml_data['segments']))]
@@ -1124,6 +1115,18 @@ def arg_check_demarcation(find_demarcation):
     else:
         return find_demarcation
 
+def arg_check_number(check_num):
+    if not check_num:
+        raise argparse.ArgumentTypeError("Number is not defined!")
+    elif not unicode(check_num).isnumeric():
+        raise argparse.ArgumentTypeError("{0} is not number!".format(check_num))
+
+    elif int(check_num) <= 0:
+        raise argparse.ArgumentTypeError("The number {0} is not valid, the number 0 or less is not allowed!".format(check_num))
+    
+    else:
+        return int(check_num)
+
 def create_args_parser():
     now = datetime.now()
     desc = 'Grab Movistar TV EPG guide via Multicast from %s to %s' % (
@@ -1167,6 +1170,29 @@ def create_args_parser():
                         action='store',
                         type=arg_check_demarcation,
                         default='Navarra')
+    parser.add_argument('--disable_multithread',
+                        help='Disable the use multithread in the process of get the info.',
+                        action='store_true',
+                        default=False)
+    parser.add_argument('--threads',
+                        help='Set the number threads, default 3.',
+                        action='store',
+                        type=arg_check_number,
+                        default=3)
+    parser.add_argument('--max_credits',
+                        help='Maximum number of actors/directors to be shown in the credits list, default 4.',
+                        action='store',
+                        type=arg_check_number,
+                        default=4)
+    parser.add_argument('--cache_exp',
+                        help='Number of days the cache expires, default 3.',
+                        action='store',
+                        type=arg_check_number,
+                        default=3)
+    parser.add_argument('--udpxy',
+                        help='When generating the channel list the udpxy server will be added in the address. udpxy example "192.168.0.1:4022"',
+                        action='store',
+                        default=None)
     return parser
 
 
@@ -1209,6 +1235,24 @@ try:
     # Obtiene los argumentos de entrada
     args = create_args_parser().parse_args()
     
+    # Define las variables globales con los datos obtenidos de los argumentos de entrada
+    default_demarcation = args.demarcation
+    use_multithread = not args.disable_multithread
+    threads = args.threads
+    max_credits = args.max_credits
+    cache_exp = args.cache_exp
+    udpxy = args.udpxy
+    
+    '''
+    print("default_demarcation: ({0})".format(default_demarcation))
+    print("use_multithread:     ({0})".format(use_multithread))
+    print("threads              ({0})".format(threads))
+    print("max_credits          ({0})".format(max_credits))
+    print("cache_exp            ({0})".format(cache_exp))
+    print("udpxy                ({0})".format(udpxy))
+    sys.exit(0)
+    '''
+
     if args.description:
         show_description()
 
@@ -1220,9 +1264,6 @@ try:
 
     if args.reset:
         reset()
-
-    # Define las variables globales con los datos obtenidos de los argumentos de entrada
-    default_demarcation = args.demarcation
 
     # Crea la caché
     cache = Cache()
