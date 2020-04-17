@@ -66,16 +66,7 @@ demarcations = {
     'Pais Vasco': 36
 }
 
-default_demarcation = demarcations['Asturias']
-
 app_dir = '/home/hts/.xmltv'
-use_multithread = True
-threads = 3
-cache_exp = 3  # Días
-
-# Generar lista de canales para udpxy
-# 192.168.0.1:4022
-udpxy = None
 
 log_file = 'tv_grab_es_movistartv.log'
 log_level = logging.INFO
@@ -83,8 +74,6 @@ log_size = 5  # MB
 
 cookie_file = 'tv_grab_es_movistartv.cookie'
 end_points_file = 'tv_grab_es_movistartv.endpoints'
-
-max_credits = 4
 
 end_points = {
     'epNoCach1': 'http://www-60.svc.imagenio.telefonica.net:2001',
@@ -423,10 +412,10 @@ class MovistarTV:
             logger.info('Descargando configuración del cliente')
             return json.loads(self.__get_service_data('getClientProfile'))['resultData']
         except:
-            logger.error('Usando la configuración de cliente por defecto: %i|ALL|1' % default_demarcation)
+            logger.error('Usando la configuración de cliente por defecto: %i|ALL|1' % demarcations[default_demarcation])
             return {
                 'tvPackages': 'ALL',
-                'demarcation': str(default_demarcation),
+                'demarcation': str(demarcations[default_demarcation]),
                 'tvWholesaler': 1
             }
 
@@ -1105,6 +1094,38 @@ def create_logger(argv):
     logger_h.info('---------------------------------------------------')
     return logger_h
 
+def arg_check_dir_path(path):
+    if not path:
+        return ''
+
+    elif os.path.isdir(path):
+        return path
+    else:
+        raise argparse.ArgumentTypeError("{0} is not a valid path!".format(path))
+
+def arg_check_demarcation(find_demarcation):
+    isError = True
+    if find_demarcation:
+        for key in demarcations:
+            if str(find_demarcation).lower() == str(key).lower():
+                isError = False
+                break
+    if isError:
+        raise argparse.ArgumentTypeError("{0} is a demarcation not valid, use --demarcation_list for get to list demarcations allow!".format(find_demarcation))
+    else:
+        return find_demarcation
+
+def arg_check_number(check_num):
+    if not check_num:
+        raise argparse.ArgumentTypeError("Number is not defined!")
+    elif not unicode(check_num).isnumeric():
+        raise argparse.ArgumentTypeError("{0} is not number!".format(check_num))
+
+    elif int(check_num) <= 0:
+        raise argparse.ArgumentTypeError("The number {0} is not valid, the number 0 or less is not allowed!".format(check_num))
+    
+    else:
+        return int(check_num)
 
 def create_args_parser():
     now = datetime.now()
@@ -1134,10 +1155,44 @@ def create_args_parser():
                              "m3u channel list)",
                         action='store',
                         dest='channels',
+                        type=arg_check_dir_path,
                         default='')
     parser.add_argument('--reset',
                         help='Delete saved configuration, log file and caches.',
                         action='store_true')
+    parser.add_argument('--demarcation_list',
+                        help='Show list demarcation',
+                        action='store_true',
+                        default=False
+                        )
+    parser.add_argument('--demarcation',
+                        help='Select demarcation, show list all demarcations with the option --demarcation_list.',
+                        action='store',
+                        type=arg_check_demarcation,
+                        default='Navarra')
+    parser.add_argument('--disable_multithread',
+                        help='Disable the use multithread in the process of get the info.',
+                        action='store_true',
+                        default=False)
+    parser.add_argument('--threads',
+                        help='Set the number threads, default 3.',
+                        action='store',
+                        type=arg_check_number,
+                        default=3)
+    parser.add_argument('--max_credits',
+                        help='Maximum number of actors/directors to be shown in the credits list, default 4.',
+                        action='store',
+                        type=arg_check_number,
+                        default=4)
+    parser.add_argument('--cache_exp',
+                        help='Number of days the cache expires, default 3.',
+                        action='store',
+                        type=arg_check_number,
+                        default=3)
+    parser.add_argument('--udpxy',
+                        help='When generating the channel list the udpxy server will be added in the address. udpxy example "192.168.0.1:4022"',
+                        action='store',
+                        default=None)
     return parser
 
 
@@ -1152,6 +1207,12 @@ def show_capabilities():
     print 'baseline cache'
     sys.exit(0)
 
+def show_demarcation_list():
+    logger.info('Terminado: capabilities del grabber')
+    print('Lista de Demarcaciones:')
+    for key in demarcations:
+        print( "> {}".format(key))
+    sys.exit(0)
 
 def reset():
     logger.info('Terminado: eliminado el log, la configuración y la caché')
@@ -1173,12 +1234,33 @@ logger = create_logger(sys.argv)
 try:
     # Obtiene los argumentos de entrada
     args = create_args_parser().parse_args()
+    
+    # Define las variables globales con los datos obtenidos de los argumentos de entrada
+    default_demarcation = args.demarcation
+    use_multithread = not args.disable_multithread
+    threads = args.threads
+    max_credits = args.max_credits
+    cache_exp = args.cache_exp
+    udpxy = args.udpxy
+    
+    '''
+    print("default_demarcation: ({0})".format(default_demarcation))
+    print("use_multithread:     ({0})".format(use_multithread))
+    print("threads              ({0})".format(threads))
+    print("max_credits          ({0})".format(max_credits))
+    print("cache_exp            ({0})".format(cache_exp))
+    print("udpxy                ({0})".format(udpxy))
+    sys.exit(0)
+    '''
 
     if args.description:
         show_description()
 
     if args.capabilities:
         show_capabilities()
+
+    if args.demarcation_list:
+        show_demarcation_list()
 
     if args.reset:
         reset()
