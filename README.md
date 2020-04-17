@@ -37,9 +37,9 @@ Argumentos que acepta el programa:
 ```
 usage: tv_grab_es_movistartv  [-h] [--description] [--capabilities] [--output FILENAME]
                               [--m3u OUTPUT] [--tvheadend CHANNELS] [--reset]
-                              [--demarcation_list] [--demarcation DEMARCATION]
-                              [--disable_multithread] [--threads THREADS]
-                              [--max_credits MAX_CREDITS] [--cache_exp CACHE_EXP]
+                              [--demarcation-list] [--demarcation DEMARCATION]
+                              [--disable-multithread] [--threads THREADS]
+                              [--max-credits MAX_CREDITS] [--cache-exp CACHE_EXP]
                               [--udpxy UDPXY]
 
 Grab Movistar TV EPG guide via Multicast from 17/04/2020 to 21/04/2020
@@ -56,18 +56,18 @@ optional arguments:
                         configuration page to update both: the EPG guide and
                         the m3u channel list)
   --reset               Delete saved configuration, log file and caches.
-  --demarcation_list    Show list demarcation
+  --demarcation-list    Show list demarcation
   --demarcation DEMARCATION
                         Select demarcation, show list all demarcations with
-                        the option --demarcation_list.
-  --disable_multithread
+                        the option --demarcation-list.
+  --disable-multithread
                         Disable the use multithread in the process of get the
                         info.
   --threads THREADS     Set the number threads, default 3.
-  --max_credits MAX_CREDITS
+  --max-credits MAX_CREDITS
                         Maximum number of actors/directors to be shown in the
                         credits list, default 4.
-  --cache_exp CACHE_EXP
+  --cache-exp CACHE_EXP
                         Number of days the cache expires, default 3.
   --udpxy UDPXY         When generating the channel list the udpxy server will
                         be added in the address. udpxy example
@@ -76,11 +76,11 @@ optional arguments:
 ```
 
 ### Ejemplos:
-**Aviso:** Deberemos especificar el argumento `--demarcation` para obtener los datos de la regios que deseamos. Para obtener la lista de regiones usaremos el argumento `--demarcation_list`.
+**Aviso:** Deberemos especificar el argumento `--demarcation` para obtener los datos de la regios que deseamos. Para obtener la lista de regiones usaremos el argumento `--demarcation-list`.
 
 Lista de regiones:
 ```bash
-$ tv_grab_es_movistartv --demarcation_list
+$ tv_grab_es_movistartv --demarcation-list
 ```
 
 Vuelca la guía EPG en un archivo XML:
@@ -186,7 +186,7 @@ $ tv_grab_es_movistartv --demarcation Navarra --threads 2 --tvheadend /home/hts/
 
 Si sigues teniendo problemas desactiva el multihilo: 
 ```bash
-$ tv_grab_es_movistartv --demarcation Navarra --disable_multithread --tvheadend /home/hts/.xmltv/MovistarTV
+$ tv_grab_es_movistartv --demarcation Navarra --disable-multithread --tvheadend /home/hts/.xmltv/MovistarTV
 ```
 
 ## Autor
