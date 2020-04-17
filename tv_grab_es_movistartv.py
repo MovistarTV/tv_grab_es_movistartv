@@ -1212,10 +1212,13 @@ def show_capabilities():
     sys.exit(0)
 
 def show_demarcation_list():
-    logger.info('Terminado: capabilities del grabber')
+    logger.info('Terminado: Lista de demarcaciones')
     print('Lista de Demarcaciones:')
     for key in demarcations:
-        print( "> {}".format(key))
+        if str(key).lower() == str(default_demarcation).lower():
+            print( "> {} *".format(key))
+        else:
+            print( "> {}".format(key))
     sys.exit(0)
 
 def reset():
