@@ -66,7 +66,8 @@ demarcations = {
     'Pais Vasco': 36
 }
 
-app_dir = '/home/hts/.xmltv'
+#app_dir = '/home/hts/.xmltv'
+app_dir = 'C:\123'
 
 log_file = 'tv_grab_es_movistartv.log'
 log_level = logging.INFO
@@ -1111,7 +1112,7 @@ def arg_check_demarcation(find_demarcation):
                 isError = False
                 break
     if isError:
-        raise argparse.ArgumentTypeError("{0} is a demarcation not valid, use --demarcation_list for get to list demarcations allow!".format(find_demarcation))
+        raise argparse.ArgumentTypeError("{0} is a demarcation not valid, use --demarcation-list for get to list demarcations allow!".format(find_demarcation))
     else:
         return find_demarcation
 
@@ -1160,33 +1161,37 @@ def create_args_parser():
     parser.add_argument('--reset',
                         help='Delete saved configuration, log file and caches.',
                         action='store_true')
-    parser.add_argument('--demarcation_list',
+    parser.add_argument('--demarcation-list',
                         help='Show list demarcation',
                         action='store_true',
+                        dest='demarcation_list',
                         default=False
                         )
     parser.add_argument('--demarcation',
-                        help='Select demarcation, show list all demarcations with the option --demarcation_list.',
+                        help='Select demarcation, show list all demarcations with the option --demarcation-list.',
                         action='store',
                         type=arg_check_demarcation,
                         default='Navarra')
-    parser.add_argument('--disable_multithread',
+    parser.add_argument('--disable-multithread',
                         help='Disable the use multithread in the process of get the info.',
                         action='store_true',
+                        dest='disable_multithread',
                         default=False)
     parser.add_argument('--threads',
                         help='Set the number threads, default 3.',
                         action='store',
                         type=arg_check_number,
                         default=3)
-    parser.add_argument('--max_credits',
+    parser.add_argument('--max-credits',
                         help='Maximum number of actors/directors to be shown in the credits list, default 4.',
                         action='store',
+                        dest='max_credits',
                         type=arg_check_number,
                         default=4)
-    parser.add_argument('--cache_exp',
+    parser.add_argument('--cache-exp',
                         help='Number of days the cache expires, default 3.',
                         action='store',
+                        dest='cache_exp',
                         type=arg_check_number,
                         default=3)
     parser.add_argument('--udpxy',
@@ -1252,6 +1257,7 @@ try:
     print("udpxy                ({0})".format(udpxy))
     sys.exit(0)
     '''
+    
 
     if args.description:
         show_description()
