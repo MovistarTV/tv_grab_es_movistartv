@@ -66,8 +66,7 @@ demarcations = {
     'Pais Vasco': 36
 }
 
-#app_dir = '/home/hts/.xmltv'
-app_dir = 'C:\123'
+app_dir = '/home/hts/.xmltv'
 
 log_file = 'tv_grab_es_movistartv.log'
 log_level = logging.INFO
