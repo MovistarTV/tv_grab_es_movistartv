@@ -2,14 +2,13 @@
 
 Grabber XMLTV para el servicio de Televisión IPTV de Movistar España.
 
-Genera la guía *EPG* en formato _XMLTV_ y la _lista de canales_ en formato _M3U_ a partir de los datos 
-suministrados por el operador vía multicast.
+Genera la guía *EPG* en formato _XMLTV_ y la _lista de canales_ en formato _M3U_ a partir de los datos suministrados por el operador vía multicast.
 
 Se integra con TVHeadend.
 
 ![Kodi + TVHeadend + Movistar TV Grabber](images/koditvhmtv.png)
 
-#### Requisitos:
+## Requisitos:
 
 * Servicio de Movistar TV correctamente configurado (DNS `172.26.23.3` y rutas correspondientes).
 * Funciona tanto por Wifi como por Ethernet, pero mejor por cable.
@@ -36,11 +35,14 @@ Se integra con TVHeadend.
 
 Argumentos que acepta el programa:
 ```
-usage: tv_grab_es_movistartv [-h] [--description] [--capabilities]
-                             [--output FILENAME] [--m3u OUTPUT]
-                             [--tvheadend CHANNELS] [--reset]
+usage: tv_grab_es_movistartv  [-h] [--description] [--capabilities] [--output FILENAME]
+                              [--m3u OUTPUT] [--tvheadend CHANNELS] [--reset]
+                              [--demarcation_list] [--demarcation DEMARCATION]
+                              [--disable_multithread] [--threads THREADS]
+                              [--max_credits MAX_CREDITS] [--cache_exp CACHE_EXP]
+                              [--udpxy UDPXY]
 
-Grab Movistar TV EPG guide via Multicast from 10/06/2017 to 14/06/2017
+Grab Movistar TV EPG guide via Multicast from 17/04/2020 to 21/04/2020
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -54,34 +56,53 @@ optional arguments:
                         configuration page to update both: the EPG guide and
                         the m3u channel list)
   --reset               Delete saved configuration, log file and caches.
+  --demarcation_list    Show list demarcation
+  --demarcation DEMARCATION
+                        Select demarcation, show list all demarcations with
+                        the option --demarcation_list.
+  --disable_multithread
+                        Disable the use multithread in the process of get the
+                        info.
+  --threads THREADS     Set the number threads, default 3.
+  --max_credits MAX_CREDITS
+                        Maximum number of actors/directors to be shown in the
+                        credits list, default 4.
+  --cache_exp CACHE_EXP
+                        Number of days the cache expires, default 3.
+  --udpxy UDPXY         When generating the channel list the udpxy server will
+                        be added in the address. udpxy example
+                        "192.168.0.1:4022"
+
 ```
 
-#### Ejemplos:
+### Ejemplos:
+**Aviso:** Deberemos especificar el argumento `--demarcation` para obtener los datos de la regios que deseamos. Para obtener la lista de regiones usaremos el argumento `--demarcation_list`.
+
+Lista de regiones:
+```bash
+$ tv_grab_es_movistartv --demarcation_list
+```
 
 Vuelca la guía EPG en un archivo XML:
 ```bash
-$ tv_grab_es_movistartv --output /home/hts/.xmltv/guia.xml
+$ tv_grab_es_movistartv --demarcation Madrid --output /home/hts/.xmltv/guia.xml
 ```
 
 Genera la lista de canales:
 ```bash
-$ tv_grab_es_movistartv --m3u /home/hts/.xmltv/MovistarTV
+$ tv_grab_es_movistartv --demarcation 'Castilla y Leon' --m3u /home/hts/.xmltv/MovistarTV
 ```
 
 Actualiza la EPG y la lista de canales en TVHeadend:
 ```bash
-$ tv_grab_es_movistartv --tvheadend /home/hts/.xmltv/MovistarTV
+$ tv_grab_es_movistartv --demarcation Navarra --tvheadend /home/hts/.xmltv/MovistarTV
 ```
 
 ### Configuración
 
 Edita el programa con vi, nano, gedit, kedit... y cambia los parámetros de configuración según tus necesidades:
 ```
-default_demarcation = demarcations['Asturias']
-
 app_dir = '/home/hts/.xmltv'
-use_multithread = True
-cache_exp = 3  # Días
 
 log_file = 'tv_grab_es_movistartv.log'
 log_level = logging.INFO
@@ -89,15 +110,10 @@ log_size = 5  # MB
 
 cookie_file = 'tv_grab_es_movistartv.cookie'
 end_points_file = 'tv_grab_es_movistartv.endpoints'
-
-max_credits = 4
 ```
 
-Los más importantes son `default_demarcation` y `app_dir`:
-
-* `default_demarcation`: cambia `'Asturias'` por el nombre de tu provincia (ver diccionario `demarcations`)
+Lo más importante es `app_dir`:
 * `app_dir`: si cambias la ruta por defecto asegúrate de que TVHeadend tiene permisos de escritura en la nueva ruta
-* `max_credits`: número máximo de actores/directores que se mostrarán en la lista de créditos
 
 ### Integración en TVheadend
 
@@ -112,8 +128,7 @@ Reinicia y ve a la interfaz web de TVHeadend:
 
 ![TVHeadend Grabber Modules Config](images/tvhconfig.png)
 
-En `Configuration -> Channel / EPG -> EPG Grabber Modules` activa el grabber `Internal XMLTV: Spain (MovistarTV)` 
-y pon como argumento: `--tvheadend /home/hts/.xmltv/MovistarTV`
+En `Configuration -> Channel / EPG -> EPG Grabber Modules` activa el grabber `Internal XMLTV: Spain (MovistarTV)` y pon como argumento: `--tvheadend /home/hts/.xmltv/MovistarTV`
 
 Ve a `Configuration -> Channel / EPG -> EPG Grabber`:
 
@@ -141,7 +156,7 @@ $ sudo tv_grab_es_movistartv --reset
 
 Regenera la lista de canales (cambia el usuario y la ruta según tu configuración):
 ```bash
-$ sudo -u hts tv_grab_es_movistartv --m3u /home/hts/.xmltv/MovistarTV
+$ sudo -u hts tv_grab_es_movistartv --demarcation Navarra --m3u /home/hts/.xmltv/MovistarTV
 ```
 
 Ve a la lista de canales de la interfaz web de TVHeadend en `Configuration -> Channel / EPG -> Channels`, 
@@ -154,8 +169,7 @@ en `Map all services`:
 
 ![TVHeadend Services Config](images/mapservices.png)
 
-Reinicia Kodi. Si siguen sin verse ve a la configuración de Kodi y borra los datos de la TV en 
-`Configuración -> Ajustes de PVR y TV en directo -> General -> Borrar datos`:
+Reinicia Kodi. Si siguen sin verse ve a la configuración de Kodi y borra los datos de la TV en `Configuración -> Ajustes de PVR y TV en directo -> General -> Borrar datos`:
 
 ![TVHeadend Channels Config](images/borrardatos.png)
 
@@ -163,22 +177,26 @@ Ve a la lista de canales y comprueba que ya se ven.
 
 #### - Error al descargar los archivos XML: timed out
 
-La descarga de la guía básica que viene por Multicast es multihilo, se conecta a varias IP simultáneamente para 
-agilizar el tiempo de ejecución del grabber. Por defecto hay tres hilos (tres conexiones a tres IP diferentes) 
-porque a partir de cuatro he notado que pueden aparecer errores de este tipo.
+La descarga de la guía básica que viene por Multicast es multihilo, se conecta a varias IP simultáneamente para agilizar el tiempo de ejecución del grabber. Por defecto hay tres hilos (tres conexiones a tres IP diferentes) porque a partir de cuatro he notado que pueden aparecer errores de este tipo.
 
-Si es tu caso, baja el número de conexiones a dos: edita el grabber, busca la línea `threads = 3` y cámbiala por 
-`threads = 2`.
+Si es tu caso, baja el número de conexiones a dos: 
+```bash
+$ tv_grab_es_movistartv --demarcation Navarra --threads 2 --tvheadend /home/hts/.xmltv/MovistarTV
+```
 
-Si sigues teniendo problemas desactiva el multihilo: busca la línea `use_multithread = True` y cámbiala por 
-`use_multithread = False`
+Si sigues teniendo problemas desactiva el multihilo: 
+```bash
+$ tv_grab_es_movistartv --demarcation Navarra --disable_multithread --tvheadend /home/hts/.xmltv/MovistarTV
+```
 
 ## Autor
 
 Escrito por _ _WiLloW_ _
+Actualizado por VSC55
 
-##### Basado en movistartv2xmltv by ese:
+
+### Basado en movistartv2xmltv by ese:
 * [https://github.com/ese/movistartv2xmltv](https://github.com/ese/movistartv2xmltv)
 
-##### Mil gracias a Goomer por haber dado la clave para descifrar el nuevo formato:
+### Mil gracias a Goomer por haber dado la clave para descifrar el nuevo formato:
 * [https://www.adslzone.net/postt359916-135.html#p2985166](https://www.adslzone.net/postt359916-135.html#p2985166)
