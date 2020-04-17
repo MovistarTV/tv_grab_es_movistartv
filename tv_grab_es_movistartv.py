@@ -1138,8 +1138,8 @@ def create_args_parser():
     parser.add_argument('--reset',
                         help='Delete saved configuration, log file and caches.',
                         action='store_true')
-    parser.add_argument('--demarcaions_list',
-                        help='Show list demarcaions',
+    parser.add_argument('--demarcation_list',
+                        help='Show list demarcation',
                         action='store_true',
                         default=False
                         )
@@ -1157,7 +1157,7 @@ def show_capabilities():
     print 'baseline cache'
     sys.exit(0)
 
-def show_demarcaions_list():
+def show_demarcation_list():
     logger.info('Terminado: capabilities del grabber')
     print('Lista de Demarcaciones:')
     for key in demarcations:
@@ -1191,8 +1191,8 @@ try:
     if args.capabilities:
         show_capabilities()
 
-    if args.demarcaions_list:
-        show_demarcaions_list()
+    if args.demarcation_list:
+        show_demarcation_list()
 
     if args.reset:
         reset()
