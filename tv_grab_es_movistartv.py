@@ -66,8 +66,6 @@ demarcations = {
     'Pais Vasco': 36
 }
 
-default_demarcation = demarcations['Asturias']
-
 app_dir = '/home/hts/.xmltv'
 use_multithread = True
 cache_exp = 3  # Días
@@ -422,10 +420,10 @@ class MovistarTV:
             logger.info('Descargando configuración del cliente')
             return json.loads(self.__get_service_data('getClientProfile'))['resultData']
         except:
-            logger.error('Usando la configuración de cliente por defecto: %i|ALL|1' % default_demarcation)
+            logger.error('Usando la configuración de cliente por defecto: %i|ALL|1' % demarcations[default_demarcation])
             return {
                 'tvPackages': 'ALL',
-                'demarcation': str(default_demarcation),
+                'demarcation': str(demarcations[default_demarcation]),
                 'tvWholesaler': 1
             }
 
@@ -1105,6 +1103,26 @@ def create_logger(argv):
     logger_h.info('---------------------------------------------------')
     return logger_h
 
+def arg_check_dir_path(path):
+    if not path:
+        return ''
+
+    elif os.path.isdir(path):
+        return path
+    else:
+        raise argparse.ArgumentTypeError("{0} is not a valid path!".format(path))
+
+def arg_check_demarcation(find_demarcation):
+    isError = True
+    if find_demarcation:
+        for key in demarcations:
+            if str(find_demarcation).lower() == str(key).lower():
+                isError = False
+                break
+    if isError:
+        raise argparse.ArgumentTypeError("{0} is a demarcation not valid, use --demarcation_list for get to list demarcations allow!".format(find_demarcation))
+    else:
+        return find_demarcation
 
 def create_args_parser():
     now = datetime.now()
@@ -1134,6 +1152,7 @@ def create_args_parser():
                              "m3u channel list)",
                         action='store',
                         dest='channels',
+                        type=arg_check_dir_path,
                         default='')
     parser.add_argument('--reset',
                         help='Delete saved configuration, log file and caches.',
@@ -1143,6 +1162,11 @@ def create_args_parser():
                         action='store_true',
                         default=False
                         )
+    parser.add_argument('--demarcation',
+                        help='Select demarcation, show list all demarcations with the option --demarcation_list.',
+                        action='store',
+                        type=arg_check_demarcation,
+                        default='Navarra')
     return parser
 
 
@@ -1184,7 +1208,7 @@ logger = create_logger(sys.argv)
 try:
     # Obtiene los argumentos de entrada
     args = create_args_parser().parse_args()
-
+    
     if args.description:
         show_description()
 
@@ -1196,6 +1220,9 @@ try:
 
     if args.reset:
         reset()
+
+    # Define las variables globales con los datos obtenidos de los argumentos de entrada
+    default_demarcation = args.demarcation
 
     # Crea la caché
     cache = Cache()
