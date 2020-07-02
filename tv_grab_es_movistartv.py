@@ -954,7 +954,7 @@ class XMLTV:
         season = int(program['season'])
         title = re.findall(r'(.*)\sT\d*/?\d+.*', program['full_title'], re.U)
         title = title[0] if title else program['full_title']
-        desc = ext_info['synopsis'] if ext_info else u'Año: %s' % program['year']
+        desc = ext_info['description'] if ext_info else u'Año: %s' % program['year']
         if season == 0:
             sn = re.findall(r'.*\sT(\d*/?\d+).*', program['full_title'], re.U)
             season = int(sn[0].replace('/', '')) if sn else season
@@ -1004,7 +1004,7 @@ class XMLTV:
                 tag_stitle = ElTr.SubElement(tag_programme, 'sub-title', lang['es'])
                 tag_stitle.text = str(ext_info['productionDate'])
             tag_desc = ElTr.SubElement(tag_programme, 'desc', lang['es'])
-            tag_desc.text = ext_info['synopsis']
+            tag_desc.text = ext_info['description']
             if 'productionDate' in ext_info:
                 tag_date = ElTr.SubElement(tag_programme, 'date')
                 tag_date.text = str(ext_info['productionDate'])
