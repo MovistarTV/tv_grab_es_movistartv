@@ -470,7 +470,7 @@ class MovistarTV:
             data = cache.load_epg_extended_info(pid)
             if not data:
                 logger.debug('Descargando info extendida: %s' % pid)
-                data = json.loads(self.__get_service_data('epgInfo&extra=1&productID=%s&channelID=%s&similar=0&filterHD=1' % (pid, channel_id)))['resultData']
+                data = json.loads(self.__get_service_data('epgInfov2&productID=%s&channelID=%s&extra=1' % (pid, channel_id)))['resultData']
                 cache.save_epg_extended_info(data)
             return data
         except:
@@ -529,7 +529,7 @@ class MovistarTV:
             'mcast_grp': dvb_entry_point[0],
             'mcast_port': int(dvb_entry_point[1]),
             'tvChannelLogoPath': '%s%s' % (platform['RES_BASE_URI'], params['tvChannelLogoPath']),
-            'tvCoversPath': '%s%sportrait/290x429/' % (platform['RES_BASE_URI'], params['tvCoversPath']),
+            'tvCoversPath': '%s%s%s290x429/' % (platform['RES_BASE_URI'], params['tvCoversPath'], params['portraitSubPath']),
             'tvCoversLandscapePath': '%s%s%s%s' % (
                 platform['RES_BASE_URI'],
                 params['tvCoversPath'],
@@ -952,16 +952,15 @@ class XMLTV:
     def __get_series_data(program, ext_info):
         episode = int(program['episode'])
         season = int(program['season'])
+        title = re.findall(r'(.*)\sT\d*/?\d+.*', program['full_title'], re.U)
+        title = title[0] if title else program['full_title']
         desc = ext_info['synopsis'] if ext_info else u'Año: %s' % program['year']
         if season == 0:
             sn = re.findall(r'.*\sT(\d*/?\d+).*', program['full_title'], re.U)
             season = int(sn[0].replace('/', '')) if sn else season
         if 'episode_title' in program:
-            title = program['serie']
             stitle = '%ix%02d %s' % (season, episode, program['episode_title'])
         else:
-            title = re.findall(r'(.*)\sT\d*/?\d+.*', program['full_title'], re.U)
-            title = title[0] if title else program['full_title']
             stitle = '%ix%02d %s' % (
                 season, episode, ext_info['originalTitle']
                 if ext_info and 'originalTitle' in ext_info else 'Episodio %i' % episode
