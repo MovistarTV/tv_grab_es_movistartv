@@ -1066,7 +1066,7 @@ class XMLTV:
                 m3u += '#EXTINF:-1 tvh-epg="disable" tvh-chnum="%s" ' % channel_number
                 m3u += 'tvg-id="%s.movistar.tv" tvh-tags="Movistar TV|%s|%s" ' % (
                     channel_key, channel_quality, channel_tag)
-                m3u += 'tvg-logo="%s",%s\n' % (channel_logo, channel_name)
+                m3u += 'logo="%s",%s\n' % (channel_logo, channel_name)
                 if udpxy:
                     m3u += 'http://%s/udp/%s:%s\n' % (udpxy, channel_ip, channel_port)
                 else: m3u += 'rtp://@%s:%s\n' % (channel_ip, channel_port)
