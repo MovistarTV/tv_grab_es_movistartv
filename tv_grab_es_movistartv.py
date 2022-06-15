@@ -437,7 +437,7 @@ class MovistarTV:
         except:
             logger.error('Usando el pefil del servicio por defecto')
             return {
-                'RES_BASE_URI': 'http://www-60.svc.imagenio.telefonica.net:2001/appclientv/nux/',
+                'res_BASE_URI': 'http://html5-static.svc.imagenio.telefonica.net/appclientv/nux/',
                 'dvbConfig': {'dvbEntryPoint': '239.0.2.129:3937'},
                 'endPoints': end_points
             }
@@ -528,10 +528,10 @@ class MovistarTV:
             'end_points': self.__update_end_points(platform['endPoints']),
             'mcast_grp': dvb_entry_point[0],
             'mcast_port': int(dvb_entry_point[1]),
-            'tvChannelLogoPath': '%s%s' % (platform['RES_BASE_URI'], params['tvChannelLogoPath']),
-            'tvCoversPath': '%s%s%s290x429/' % (platform['RES_BASE_URI'], params['tvCoversPath'], params['portraitSubPath']),
+            'tvChannelLogoPath': '%s%s' % (platform['res_BASE_URI'], params['tvChannelLogoPath']),
+            'tvCoversPath': '%s%s%s290x429/' % (platform['res_BASE_URI'], params['tvCoversPath'], params['portraitSubPath']),
             'tvCoversLandscapePath': '%s%s%s%s' % (
-                platform['RES_BASE_URI'],
+                platform['res_BASE_URI'],
                 params['tvCoversPath'],
                 params['landscapeSubPath'],
                 params['bigSubpath']),
